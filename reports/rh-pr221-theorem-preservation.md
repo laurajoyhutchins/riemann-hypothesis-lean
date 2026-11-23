@@ -83,3 +83,56 @@ Use the community-supplied pinned build controller already referenced in `.githu
 Upstream #221 proves that existing cohomological and inverse-function lemmas can replace duplicated tactic derivations. The largest historical source concentration in this fork is `Development/AbelianVarietyTheory/Proofs`, but no measurable transfer rate has been established. A selective, kernel-verified backport onto the **smaller original fork baseline** is preferable for the absolute under-10-million-line goal: upstream #221 saves 221,158 lines on its own baseline, while preceding upstream synchronization adds 3,414,684 lines compared to our smaller fork. Future candidate savings are unquantified.
 
 See [technical notebook study](https://github.com/laurajoyhutchins/technical-notebook/blob/main/content/studies/upstream-rh-proof-reuse-compression.md).
+
+
+## Upstream Comparator inputs and reproducible fast preflight
+
+Following the source integration, the fork imported upstream's exact
+[`comparator.json`](https://github.com/leanprover-community/riemann-hypothesis/blob/98cc3736f046abae883d8cda839c84f3004257a7/comparator.json)
+(blob `e989bcf90ff0c487a7146319a026e661a5bad47c`) and
+[`export-targets.txt`](https://github.com/leanprover-community/riemann-hypothesis/blob/98cc3736f046abae883d8cda839c84f3004257a7/export-targets.txt)
+(blob `e2d4c02bac8a1411eae85af0376c1aad3b6b5294`).
+These are exact reused verification artifacts, not locally redesigned rules.
+Both required files were missing from the earlier fork integration branch.
+
+[`tools/rh_pr221_verify_inputs.py`](../tools/rh_pr221_verify_inputs.py)
+now implements a fail-closed preflight for these inputs and the complete source
+tree identity. Its checks are:
+
+- Upstream source-tree SHA `84e5e9889142f86f47b3156b54009f65fc274f82`;
+- exact Git blobs for `lakefile.toml`, `lake-manifest.json`,
+  `lean-toolchain`, `src/Main.lean`, `src/Statements.lean`,
+  `src/Challenge.lean`, Comparator configuration and export target list;
+- the five declarations, their written proposition names and the export list;
+- the three trusted axioms `propext`, `Quot.sound`, `Classical.choice`;
+- configured independent external kernels `Lean paranoid` and `nanoda`.
+
+The existing [community CI-contract workflow](../.github/workflows/rh-community-upstream.yml)
+reuses the pinned upstream harness and checks the fork's two Comparator
+configuration files against upstream without reconstructing its proof code.
+[Run 45221810422](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/actions/runs/45221810422)
+**passed** the three new preflight unit tests, all pinned input checks,
+the existing identity adapter unit tests, and upstream offline CI tests.
+The first expanded preflight run
+[45221600254](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/actions/runs/45221600254)
+failed because `lakefile.toml` had been omitted from sparse checkout.
+The missing checkout entry was fixed in commit
+[`6c3ab93`](https://github.com/laurajoyhutchins/riemann-hypothesis-lean/commit/6c3ab93718f524b346a16079857a64d49d038992).
+This was a test infrastructure error, not a failed mathematical proof.
+
+Reproduce the fast preflight from the pinned branch:
+
+```bash
+python3 tools/rh_pr221_verify_inputs.py --test
+python3 tools/rh_pr221_verify_inputs.py .
+```
+
+**Verification boundary.** These are source and configuration checks only. The
+`community-full-build` workflow job was skipped in the passing run because
+it requires explicit dispatch to a properly provisioned `rh-build` self-hosted
+runner. A full clean rebuild, exact elaborated theorem type comparisons,
+axiom dependency checks and independent Lean/nanoda kernel replay are still
+required before merging to main. The existing community controller remains
+the designated implementation for the full build; no second build controller
+has been introduced. The fork currently has no passing five-root kernel
+verification receipt for the changed source.
