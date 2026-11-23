@@ -35,7 +35,7 @@ variable {H : Type} [AddCommGroup H] [Fintype H] [DecidableEq H]
 /-- The original InputsB fields already force the sharpened slope
 inequality for the concrete mkData family. -/
 theorem integrated_slope_of_inputsB
-    (D : ArithData H) (ell : AddChar (E0 × H) ℂ)
+    (D : ArithData H) (ell : AddChar (E0 × H) ℂ → ℂ)
     (G : Glob) (C : Consts) (cT : ℝ) (N : ℕ)
     (TT T2 : Finset H) (a : H → ℝ)
     (w : H → Fin m → E0 × H → ℝ) (Fm : ∀ u0, Fam (W u0) m)
@@ -61,7 +61,7 @@ theorem integrated_slope_of_inputsB
 assumptions imply a weighted mean bound with the rational harmonic
 rank-loss term. This does not merely restate a stronger slope premise. -/
 theorem weighted_mean_of_inputs2_integrated
-    (D : ArithData H) (ell : AddChar (E0 × H) ℂ)
+    (D : ArithData H) (ell : AddChar (E0 × H) ℂ → ℂ)
     (G : Glob) (C : Consts) (cT : ℝ) (N : ℕ)
     (TT T2 : Finset H) (a : H → ℝ)
     (w : H → Fin m → E0 × H → ℝ) (Fm : ∀ u0, Fam (W u0) m)
