@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: research/upstream-pr221-integration-20261123
-          fetch-depth: 1
+          fetch-depth: 0
           persist-credentials: true
           submodules: false
       - name: Test census before touching proof source
@@ -47,9 +47,29 @@ jobs:
           parents="$(git show -s --format='%P' "$UPSTREAM_MERGE")"
           test "$parents" = "$UPSTREAM_FIRST_PARENT $UPSTREAM_SECOND_PARENT"
           mkdir -p reports
-          python3 tools/rh_pr221_census.py --output "$RUNNER_TEMP/pr221-before.json"
+          python3 tools/rh_pr221_census.py --output "$RUNNER_TEMP/fork-original.json"
           base="$(git rev-parse HEAD)"
-          printf 'Fork source branch base: %s\n' "$base" >> "$GITHUB_STEP_SUMMARY"
+          printf 'Fork original source branch base: %s\n' "$base" >> "$GITHUB_STEP_SUMMARY"
+          # Fail closed: our fork's main source must be untouched since its
+          # original archive import. All local Lean proof work lives on
+          # separate branches and must never be silently overwritten.
+          src_commits="$(git rev-list HEAD -- src | wc -l)"
+          src_last="$(git log -1 --format=%H -- src)"
+          if test "$src_commits" -ne 1 || test "$src_last" != 0fb9869c6e6d7b54b67de803af0e0be29d37fc22; then
+            echo "Unrecognized fork src history: $src_commits commits, latest $src_last" >&2
+            exit 1
+          fi
+          if test -n "$(git ls-files -- scripts)"; then
+            echo "Fork has independent scripts; refusing to overwrite" >&2
+            exit 1
+          fi
+          # Keep the fork's docs, tools, CI, and existing PRs. Import only
+          # community source + the source's matching build inputs. This
+          # first commit is NOT counted as savings from PR #221.
+          git restore --source="$UPSTREAM_FIRST_PARENT" --staged --worktree --             src lakefile.toml lake-manifest.json lean-toolchain scripts
+          python3 tools/rh_pr221_census.py --before "$RUNNER_TEMP/fork-original.json"             --output "$RUNNER_TEMP/pre221-upstream-sync.json"
+          git commit -m "sync: import community pre-221 Lean source and build inputs"             -m "Source: leanprover-community/riemann-hypothesis@97ed34c57bc0d159b51c77a9e7e2ba59932b1256"             -m "Fork source had exactly its original archive import commit."
+          python3 tools/rh_pr221_census.py --output "$RUNNER_TEMP/pr221-before.json"
           git diff --no-ext-diff --binary "$UPSTREAM_FIRST_PARENT" "$UPSTREAM_MERGE" -- > "$RUNNER_TEMP/pr221-full.patch"
           git diff --numstat "$UPSTREAM_FIRST_PARENT" "$UPSTREAM_MERGE" -- > "$RUNNER_TEMP/upstream-numstat.txt"
           wc -l "$RUNNER_TEMP/upstream-numstat.txt" >> "$GITHUB_STEP_SUMMARY"
@@ -87,6 +107,10 @@ jobs:
           p = pathlib.Path('reports/rh-pr221-integration.json')
           d = json.loads(p.read_text())
           d['upstream_pr'] = 221
+          d['fork_original_census'] = json.loads(pathlib.Path(
+              os.environ['RUNNER_TEMP'], 'fork-original.json').read_text())
+          d['upstream_pre221_sync'] = json.loads(pathlib.Path(
+              os.environ['RUNNER_TEMP'], 'pre221-upstream-sync.json').read_text())
           d['upstream_merge'] = os.environ['UPSTREAM_MERGE']
           d['upstream_first_parent'] = os.environ['UPSTREAM_FIRST_PARENT']
           d['upstream_second_parent'] = os.environ['UPSTREAM_SECOND_PARENT']
