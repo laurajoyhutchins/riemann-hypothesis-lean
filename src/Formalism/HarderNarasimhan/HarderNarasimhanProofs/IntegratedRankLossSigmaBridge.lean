@@ -60,9 +60,7 @@ theorem sigmaLowSlopeCorank {I : Type*} [Fintype I]
             rw [Finset.sum_boole]
       _ = ∑ i, ∑ j : Fin (n i),
           if a i j < s - t then (1 : ℝ) else 0 := by
-            simpa only using (Fintype.sum_sigma'
-              (fun (i : I) (j : Fin (n i)) =>
-                if a i j < s - t then (1 : ℝ) else 0))
+            simpa using (Fintype.sum_sigma' (fun i j => if a i j < s - t then (1 : ℝ) else 0))
       _ = ∑ i, (((Finset.univ.filter
           (fun j : Fin (n i) => a i j < s - t)).card : ℝ)) := by
             apply Finset.sum_congr rfl

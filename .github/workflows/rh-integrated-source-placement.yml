@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossSourcePlacement.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/TheoremFSharp.lean'
+      - 'src/Formalism/HarderNarasimhan/StatementFrameFIntegrated.lean'
       - '.github/workflows/rh-integrated-source-placement.yml'
   workflow_dispatch:
 
@@ -32,7 +34,7 @@ jobs:
           mk_all-check: false
           use-mathlib-cache: true
           use-github-cache: false
-      - name: Compile the original geometric rank theorem and exact-corank wrapper
+      - name: Compile original HN theorem, exported sharp bound, and axiom audit
         run: |
           set -euo pipefail
           lake build Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossSourcePlacement
