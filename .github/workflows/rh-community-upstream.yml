@@ -35,6 +35,7 @@ jobs:
           sparse-checkout: |
             .gitmodules
             lake-manifest.json
+            lakefile.toml
             lean-toolchain
             comparator.json
             export-targets.txt
