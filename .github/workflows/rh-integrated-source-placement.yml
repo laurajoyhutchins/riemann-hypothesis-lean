@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/IntegratedRankLossSourcePlacement.lean'
+      - 'src/Formalism/HarderNarasimhan/HarderNarasimhanProofs/TheoremFSharp.lean'
       - '.github/workflows/rh-integrated-source-placement.yml'
   workflow_dispatch:
 
@@ -30,9 +31,21 @@ jobs:
           test: false
           lint: false
           mk_all-check: false
-          use-mathlib-cache: true
+          use-mathlib-cache: false
           use-github-cache: false
-      - name: Compile the original geometric rank theorem and exact-corank wrapper
+      - name: Restore official pinned Mathlib cache with bounded retries
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if lake exe cache get; then
+              exit 0
+            fi
+            echo "Mathlib cache retry $attempt/3" >&2
+            sleep $((attempt * 10))
+          done
+          exit 1
+      - name: Compile the modified original theorem and exact-corank wrapper
         run: |
           set -euo pipefail
           lake build Formalism.HarderNarasimhan.HarderNarasimhanProofs.IntegratedRankLossSourcePlacement
