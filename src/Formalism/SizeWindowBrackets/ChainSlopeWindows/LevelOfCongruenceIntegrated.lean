@@ -193,6 +193,64 @@ theorem Ga_bound5_integrated
   unfold K5v5 at hsl
   linarith
 
+
+/-- Stronger arithmetic mean-bound interface using the same original
+hypotheses, except for the sharpened local integrated-slope inequality.
+It leaves the old \`MeanBoundWith\` unchanged. -/
+def MeanBoundWithIntegrated : Prop :=
+  Nonempty U0 → D.HidaSetting C → D.DIV C → EComp5 D C →
+    D.HComp C → Count5 D C → D.Slopes C →
+    QuotientSlopeBoundsWith D C Xpp → LossBounds D C →
+    D.SlopeIneqIntegrated → D.HHBound C → D.FParams →
+    umean D.ASK ≤ umean D.Main + errorTermWithIntegrated D C Xpp
+
+/-- The original weighted-mean calculation with the now-checked sharp
+source-level bound, rather than a comparison against the old logarithmic
+error. -/
+theorem weighted_mean_bound_integrated : MeanBoundWithIntegrated D C Xpp := by
+  intro hne hS hDIV hE hH hCount hSl hSN hLoss hSI hHH hFP
+  letI : Nonempty U0 := hne
+  have hcSl1 : 0 ≤ C.cSl1 := by
+    obtain ⟨_, _, _, _, _, _, _, _, _, _, _, _, hc, _, _, _, _⟩ := hS
+    exact hc
+  have hGa : ∀ u0, D.Ga u0 ≤
+      D.Main u0 + Real.log (Fintype.card (W u0) : ℝ)
+        + C.cSl1 * D.IO u0 + 0 * D.IO u0
+        + (K0v5 D C + K7v5 D C Xpp
+          + (1 - D.delBar)⁻¹ *
+            (4 * (UBar5 D C Xpp * (D.x ^ C.cHH * D.b) /
+              (UBar5 D C Xpp + D.x ^ C.cHH * D.b))
+             + (D.etaBar + 4 * Real.sqrt D.eBar) *
+               (D.x ^ C.cHH * D.b))) := by
+    intro u0
+    have h1 := Ga_bound5_integrated D C Xpp
+      hS hDIV hE hH hCount hSl hSN hLoss hSI hHH hFP u0
+    have h2 := weighted_mean_lower_bound_le D C Xpp hS hCount u0
+    linarith
+  have h1 := umean_le_comb (X := D.Ga) (A := D.Main)
+    (B := fun u0 => Real.log (Fintype.card (W u0) : ℝ))
+    (P := D.IO) (E := D.IO)
+    (C.cSl1) 0
+    (K0v5 D C + K7v5 D C Xpp
+      + (1 - D.delBar)⁻¹ *
+        (4 * (UBar5 D C Xpp * (D.x ^ C.cHH * D.b) /
+          (UBar5 D C Xpp + D.x ^ C.cHH * D.b))
+         + (D.etaBar + 4 * Real.sqrt D.eBar) *
+           (D.x ^ C.cHH * D.b))) hGa
+  have h2 := umean_le_comb (X := D.ASK)
+    (A := fun u0 => D.ASK u0 - D.Ga u0) (B := D.Ga)
+    (P := D.Ga) (E := D.Ga) 0 0 0 (fun i => by
+      show D.ASK i ≤
+        (D.ASK i - D.Ga i) + D.Ga i +
+          0 * D.Ga i + 0 * D.Ga i + 0
+      linarith)
+  have hLoss' := losses_of_losses5 D C hLoss
+  have h3 := mul_le_mul_of_nonneg_left hLoss'.2 hcSl1
+  have h4 := hLoss'.1
+  dsimp only [K0v5, K7v5, Data.EDiv] at h1
+  unfold errorTermWithIntegrated MLo5
+  linarith
+
 end
 
 end Formalism.LFunctionChainParameters.WeightedSlopeBounds
