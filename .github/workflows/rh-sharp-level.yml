@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/LevelOfCongruenceIntegrated.lean'
+      - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/IntegratedLatticeArithmeticBridge.lean'
       - '.github/workflows/rh-sharp-level.yml'
   workflow_dispatch:
 
@@ -46,3 +47,4 @@ jobs:
         run: |
           set -euo pipefail
           lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.LevelOfCongruenceIntegrated
+          lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.IntegratedLatticeArithmeticBridge
