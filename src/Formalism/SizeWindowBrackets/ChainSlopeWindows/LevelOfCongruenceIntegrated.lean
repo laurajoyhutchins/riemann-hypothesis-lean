@@ -251,6 +251,79 @@ theorem weighted_mean_bound_integrated : MeanBoundWithIntegrated D C Xpp := by
   unfold errorTermWithIntegrated MLo5
   linarith
 
+
+/-- The harmonic tail contribution is bounded by its input spread,
+including the zero-denominator case of Lean's totalized division. -/
+theorem harmonicLoss_le_spread (u H : ℝ) (hu : 0 ≤ u) (hH : 0 ≤ H) :
+    u * H / (u + H) ≤ u := by
+  rcases (add_nonneg hu hH).eq_or_lt with hzero | hpos
+  · have hu0 : u = 0 := by linarith
+    simp [hu0]
+  · apply (div_le_iff₀ hpos).2
+    nlinarith [sq_nonneg u]
+
+/-- A simpler arithmetic budget with no logarithm and no denominator
+in the *rank-tail* contribution. Other independently occurring
+logarithms in the arithmetic argument are deliberately unchanged. -/
+def errorTermWithSpreadCap : ℝ :=
+  D.sumA * (C.cCount * (D.La + (m : ℝ) ^ 2 * D.La / D.k))
+    + (C.cDiv * D.nT * D.a * D.La +
+        C.cDiv * (m : ℝ) * (D.B0 + D.Nc) * D.x ^ (C.eDiv * D.ε))
+    + (m : ℝ) * C.cE * D.B0
+    + C.cSlope * D.nT * D.a * D.La * (1 + (m : ℝ) / D.k)
+    + umean (fun u0 => Real.log (Fintype.card (W u0) : ℝ))
+    + D.LoP C
+    + MLo5 D C Xpp
+    + (1 - D.delBar)⁻¹ *
+        (4 * UBar5 D C Xpp +
+          (D.etaBar + 4 * Real.sqrt D.eBar) * (D.x ^ C.cHH * D.b))
+
+/-- The full harmonic budget implies the pure-spread budget under
+the existing positivity assumptions. No asymptotic approximation
+or new geometric hypothesis is used. -/
+theorem errorTermWithIntegrated_le_spreadCap
+    (hS : D.HidaSetting C) (hU : 0 ≤ UBar5 D C Xpp) :
+    errorTermWithIntegrated D C Xpp ≤
+      errorTermWithSpreadCap D C Xpp := by
+  have hx : 0 < D.x ^ C.cHH := Real.rpow_pos_of_pos hS.1 _
+  have hb : 0 < D.b := hS.2.1
+  have hH : 0 ≤ D.x ^ C.cHH * D.b := (mul_pos hx hb).le
+  have htail := harmonicLoss_le_spread
+    (UBar5 D C Xpp) (D.x ^ C.cHH * D.b) hU hH
+  have hinv : 0 ≤ (1 - D.delBar)⁻¹ := by
+    obtain ⟨_, _, _, _, _, _, _, _, _, _, _, _, _, hd, _, _, _⟩ := hS
+    exact inv_nonneg.mpr (by linarith)
+  have hscaled := mul_le_mul_of_nonneg_left
+    (show
+      4 * (UBar5 D C Xpp * (D.x ^ C.cHH * D.b) /
+          (UBar5 D C Xpp + D.x ^ C.cHH * D.b)) +
+        (D.etaBar + 4 * Real.sqrt D.eBar) * (D.x ^ C.cHH * D.b) ≤
+      4 * UBar5 D C Xpp +
+        (D.etaBar + 4 * Real.sqrt D.eBar) * (D.x ^ C.cHH * D.b) by
+        nlinarith [htail]) hinv
+  unfold errorTermWithIntegrated errorTermWithSpreadCap
+  linarith
+
+/-- The actual sharpened arithmetic mean bound also yields a uniform
+spread-only rank-tail budget. All other original hypotheses are kept;
+in particular the source realization of SlopeIneqIntegrated remains
+a separate, explicit proof obligation. -/
+def MeanBoundWithSpreadCap : Prop :=
+  Nonempty U0 → D.HidaSetting C → D.DIV C → EComp5 D C →
+    D.HComp C → Count5 D C → D.Slopes C →
+    QuotientSlopeBoundsWith D C Xpp → LossBounds D C →
+    D.SlopeIneqIntegrated → D.HHBound C → D.FParams →
+    umean D.ASK ≤ umean D.Main + errorTermWithSpreadCap D C Xpp
+
+theorem weighted_mean_bound_spread_cap : MeanBoundWithSpreadCap D C Xpp := by
+  intro hne hS hDIV hE hH hCount hSl hSN hLoss hSI hHH hFP
+  letI : Nonempty U0 := hne
+  have hU := UBar5_nonneg D C Xpp hS hE hH hCount hSl hSN hLoss
+  have hmean := weighted_mean_bound_integrated D C Xpp
+    hne hS hDIV hE hH hCount hSl hSN hLoss hSI hHH hFP
+  have herr := errorTermWithIntegrated_le_spreadCap D C Xpp hS hU
+  linarith
+
 end
 
 end Formalism.LFunctionChainParameters.WeightedSlopeBounds
