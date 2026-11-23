@@ -330,3 +330,6 @@ end Formalism.LFunctionChainParameters.WeightedSlopeBounds
 
 #print axioms Formalism.LFunctionChainParameters.WeightedSlopeBounds.Ga_bound5_integrated
 #print axioms Formalism.LFunctionChainParameters.WeightedSlopeBounds.weighted_mean_bound_integrated
+
+#print axioms Formalism.LFunctionChainParameters.WeightedSlopeBounds.errorTermWithIntegrated_le_spreadCap
+#print axioms Formalism.LFunctionChainParameters.WeightedSlopeBounds.weighted_mean_bound_spread_cap
