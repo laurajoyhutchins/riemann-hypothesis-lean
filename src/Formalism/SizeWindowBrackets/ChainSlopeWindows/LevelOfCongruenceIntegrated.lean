@@ -42,7 +42,7 @@ theorem sourceSpread_le_UBar5
     obtain ⟨_, _, _, _, _, _, _, _, _, _, _, _, hc, _, _, _, _⟩ := hS
     exact hc
   have hIO := mul_le_mul_of_nonneg_left (hLoss u0).2 hcSl1
-  unfold UBar5 Data.K3 MLo5 K7v5
+  dsimp only [UBar5, Data.K3, MLo5, K7v5] at hlocal hweighted ⊢
   linarith
 
 /-- The old arithmetic assumptions provide exactly the source cap
