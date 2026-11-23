@@ -21,6 +21,8 @@ BLOBS = {
     "src/Main.lean": "67c65badc15f80a1db65df1c84dc7a4928fc410f",
     "src/Statements.lean": "23b01f745b80075e377c415abae96ece3570d0b0",
     "src/Challenge.lean": "9677ace64b3a5e8b1a571d82d52ee13c53b08026",
+    "scripts/rh-buildq/fragment.py": "2432f5e8d84feb7d40cdef992de5bf6c9e368bd6",
+    "scripts/rh-buildq/README.md": "c3f839d472ba4c50d08609cc347501e244badd99",
 }
 FINAL_TYPES = {
     "riemannHypothesis": "RiemannHypothesis",

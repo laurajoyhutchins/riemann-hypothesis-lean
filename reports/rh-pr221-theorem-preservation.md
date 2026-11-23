@@ -136,3 +136,28 @@ required before merging to main. The existing community controller remains
 the designated implementation for the full build; no second build controller
 has been introduced. The fork currently has no passing five-root kernel
 verification receipt for the changed source.
+
+## Community build-infrastructure update (23 November 2026, pinned 603ea756)
+
+The community advanced four commits beyond PR #221, merging
+[#425](https://github.com/leanprover-community/riemann-hypothesis/pull/425) and
+[#426](https://github.com/leanprover-community/riemann-hypothesis/pull/426).
+A complete Git comparison from `98cc3736` to
+[`603ea756`](https://github.com/leanprover-community/riemann-hypothesis/commit/603ea75621e6ff907690902e2a35e7a974183ba3)
+modifies **only three paths**: `.github/workflows/build-pr.yml`,
+`scripts/rh-buildq/fragment.py`, and `scripts/rh-buildq/README.md`.
+The community `src/` tree is unchanged at
+`84e5e9889142f86f47b3156b54009f65fc274f82`, and the pinned
+Lake, toolchain, Comparator and export-target blobs remain unchanged.
+
+The integration repins its community submodule and trusted CI controller to
+`603ea756`; mirrors the two changed fragment files verbatim; and verifies
+those exact blob hashes in the existing fast preflight. The upstream
+`build-pr.yml` remains upstream-controlled rather than duplicated locally.
+The fixes terminate cancelled fragment builds before final cache publication
+and remove completed fragment trees without discarding live-run checkpoints.
+
+These operational improvements are **not** evidence of proof correctness.
+Independent clean Lean compilation, elaborated theorem-type comparison, axiom
+closure, and external kernel replay are still **not performed** on this fork.
+The integration remains draft pending those gates.

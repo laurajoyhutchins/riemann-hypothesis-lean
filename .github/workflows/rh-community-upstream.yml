@@ -42,13 +42,15 @@ jobs:
             src/Main.lean
             src/Statements.lean
             src/Challenge.lean
+            scripts/rh-buildq/fragment.py
+            scripts/rh-buildq/README.md
             tools
           sparse-checkout-cone-mode: false
           persist-credentials: false
           submodules: false
       - name: Verify pinned Git submodule object
         env:
-          COMMUNITY_SHA: 98cc3736f046abae883d8cda839c84f3004257a7
+          COMMUNITY_SHA: 603ea75621e6ff907690902e2a35e7a974183ba3
         run: |
           set -euo pipefail
           gitlink="$(git ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')"
@@ -59,7 +61,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: leanprover-community/riemann-hypothesis
-          ref: 98cc3736f046abae883d8cda839c84f3004257a7
+          ref: 603ea75621e6ff907690902e2a35e7a974183ba3
           path: community-harness
           sparse-checkout: |
             scripts
@@ -73,11 +75,13 @@ jobs:
       - name: Verify toolchain and dependency manifest remain identical
         run: |
           set -euo pipefail
-          test "$(git -C community-harness rev-parse HEAD)" = '98cc3736f046abae883d8cda839c84f3004257a7'
+          test "$(git -C community-harness rev-parse HEAD)" = '603ea75621e6ff907690902e2a35e7a974183ba3'
           cmp lean-toolchain community-harness/lean-toolchain
           cmp lake-manifest.json community-harness/lake-manifest.json
           cmp comparator.json community-harness/comparator.json
           cmp export-targets.txt community-harness/export-targets.txt
+          cmp scripts/rh-buildq/fragment.py community-harness/scripts/rh-buildq/fragment.py
+          cmp scripts/rh-buildq/README.md community-harness/scripts/rh-buildq/README.md
       - name: Check exact five-root comparator inputs and upstream source tree
         run: |
           set -euo pipefail
@@ -109,7 +113,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: leanprover-community/riemann-hypothesis
-          ref: 98cc3736f046abae883d8cda839c84f3004257a7
+          ref: 603ea75621e6ff907690902e2a35e7a974183ba3
           path: community-harness
           sparse-checkout: |
             scripts
@@ -123,8 +127,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git -C community-harness rev-parse HEAD)" = '98cc3736f046abae883d8cda839c84f3004257a7'
-          test "$(git -C candidate ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')" = '98cc3736f046abae883d8cda839c84f3004257a7'
+          test "$(git -C community-harness rev-parse HEAD)" = '603ea75621e6ff907690902e2a35e7a974183ba3'
+          test "$(git -C candidate ls-tree HEAD upstream/riemann-hypothesis-community | awk '{print $3}')" = '603ea75621e6ff907690902e2a35e7a974183ba3'
           cmp candidate/lake-manifest.json community-harness/lake-manifest.json
           cmp candidate/lean-toolchain community-harness/lean-toolchain
           command -v bwrap

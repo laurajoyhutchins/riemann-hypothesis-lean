@@ -22,7 +22,9 @@ Each job runs these steps:
 
 1. `fragment.py restore` keeps one tree per run, in `$RH_FRAGMENT_ROOT/<sha>-<run id>/`
    (default `~/rh-fragments`). Rerunning the job reuses it. The tree of a successful run is
-   deleted at the end; trees of failed runs are pruned after a week untouched. The first
+   deleted at the end. Each job also deletes the trees of other runs that have completed
+   (with any conclusion); it keeps those of queued or running runs. When it cannot read a
+   run's status, it deletes the tree only after a week untouched. The first
    time, it clones the repository and runs `lake exe cache get` at
    the nearest first-parent ancestor that has a published CI record. On every run it then
    merges the public maps (`pool-restore.py`: the `rh-buildq/pool` union, this commit's
