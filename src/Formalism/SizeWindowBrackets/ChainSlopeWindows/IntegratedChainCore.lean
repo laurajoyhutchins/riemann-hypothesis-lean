@@ -90,6 +90,30 @@ theorem chainCore_of_integrated {eD eL K cHH eK CL ε x : ℝ}
     sizeData₂_of_integrated Dd C Xpp hSD,
     hWin, hBN, hGrow, hCost, hSize⟩
 
+
+/-- First genuinely analytic use of the improved arithmetic budget:
+the original source's character-sum comparison is evaluated with the
+rational integrated error rather than the older logarithmic allowance.
+The original Ident connects these exact data to the same topExcess. -/
+theorem topExcess_of_integrated_sizeData
+    {H : Type} [AddCommGroup H] [Fintype H] [DecidableEq H]
+    {W : H → Type} [∀ u0, Fintype (W u0)] [∀ u0, Nonempty (W u0)]
+    {Top : Type} [Fintype Top] {m f : ℕ}
+    (Dd : Data H W Top m f) (C : Consts) (Xpp : ℝ)
+    (D : ArithData H) (N : ℕ) (ell : AddChar (E0 × H) ℂ → ℂ)
+    (TT : Finset H) (a : H → ℝ) (w : H → Fin m → E0 × H → ℝ)
+    (eT : Top ≃ TT) (eP : Fin f ≃ PhiSet (H := H))
+    (hId : Ident Dd D N ell TT a w eT eP)
+    (hSD : SizeData₂Integrated Dd C Xpp) :
+    topExcess D N ell TT a w ≤ errorTermWithIntegrated Dd C Xpp := by
+  letI : Nonempty H := ⟨0⟩
+  obtain ⟨hAT, hW, hGam, hLpL, hASK⟩ := hId
+  exact top_from_weighted_mean Dd D N ell TT a w eT eP
+    (errorTermWithIntegrated Dd C Xpp) hAT hW hGam hLpL hASK
+    (mean_bound_of_sizeData₂Integrated Dd C Xpp hSD)
+
+#print axioms Formalism.LFunctionChainParameters.LChain.topExcess_of_integrated_sizeData
+
 end Formalism.LFunctionChainParameters.LChain
 
 namespace Formalism.LFunctionChainParameters.LChain2
