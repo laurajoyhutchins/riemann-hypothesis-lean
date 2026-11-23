@@ -65,6 +65,22 @@ theorem integrated_slope_of_lattices
     b' X' cc b X N B v Y Y' Ball γ ιf Bf Vr
     Dstar sg η0 η1 e0 de hHyp hSide
 
+/-- Source-level arithmetic payoff. The same \`LatForS\` premise as in
+the original lattice transfer now entails the improved uniform mean
+bound. No independent \`SlopeIneqIntegrated\` hypothesis is assumed. -/
+theorem weighted_mean_of_lattices_integrated (Xpp : ℝ) :
+    Nonempty U0 → D.HidaSetting C → D.DIV C →
+      EComp5 D C → D.HComp C → Count5 D C → D.Slopes C →
+      QuotientSlopeBoundsWith D C Xpp → LossBounds D C →
+      (∀ u0, LatForS D u0) → D.HHBound C → D.FParams →
+      umean D.ASK ≤ umean D.Main + errorTermWithIntegrated D C Xpp := by
+  intro hne hS hDIV hE hH hCount hSl hSN hLoss hLat hHH hFP
+  have hSI : D.SlopeIneqIntegrated :=
+    integrated_slope_of_lattices D hLat
+  exact weighted_mean_bound_integrated D C Xpp hne hS hDIV hE hH hCount hSl hSN
+    hLoss hSI hHH hFP
+
 #print axioms Formalism.LFunctionChainParameters.LatticeToWeightTransfer.integrated_slope_of_lattices
+#print axioms Formalism.LFunctionChainParameters.LatticeToWeightTransfer.weighted_mean_of_lattices_integrated
 
 end Formalism.LFunctionChainParameters.LatticeToWeightTransfer
