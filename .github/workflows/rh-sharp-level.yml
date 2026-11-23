@@ -8,6 +8,7 @@ on:
       - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/IntegratedLatticeFamilyBridge.lean'
       - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/IntegratedFamSlope.lean'
       - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/IntegratedInputs2Mean.lean'
+      - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/IntegratedChainCore.lean'
       - '.github/workflows/rh-sharp-level.yml'
   workflow_dispatch:
 
@@ -54,3 +55,4 @@ jobs:
           lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.IntegratedLatticeFamilyBridge
           lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.IntegratedFamSlope
           lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.IntegratedInputs2Mean
+          lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.IntegratedChainCore
