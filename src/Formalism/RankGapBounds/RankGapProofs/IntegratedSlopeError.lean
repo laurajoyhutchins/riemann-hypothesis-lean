@@ -102,8 +102,9 @@ theorem errXIntegrated_le_errX
           (D.UBar C + D.x ^ C.cHH * D.b)) ≤
         4 * Real.log (1 + D.x ^ C.cHH) * (D.UBar C + D.b) := by
     nlinarith [hsharp, hlog]
-  have hinv : 0 ≤ (1 - D.delBar)⁻¹ :=
-    inv_nonneg.mpr (by have := hS.2.2.2.2.2.2.2.2.2.2.2.2.2; linarith)
+  have hinv : 0 ≤ (1 - D.delBar)⁻¹ := by
+    obtain ⟨_, _, _, _, _, _, _, _, _, _, _, _, _, hdelBar, _, _, _⟩ := hS
+    exact inv_nonneg.mpr (by linarith)
   have hcompare' := mul_le_mul_of_nonneg_left hcompare hinv
   unfold ErrXIntegrated Data.ErrX
   linarith
