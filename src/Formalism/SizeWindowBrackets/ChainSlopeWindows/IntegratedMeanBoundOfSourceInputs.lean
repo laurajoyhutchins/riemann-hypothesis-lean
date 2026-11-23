@@ -22,8 +22,12 @@ noncomputable section
 
 namespace Formalism.LFunctionChainParameters.LChain2
 
-open Formalism Formalism.RankGapBounds.WeightedMeanData
+open Formalism Formalism.D5 Formalism.RankGapBounds.WeightedMeanData
 open Formalism.LFunctionChainParameters.WeightedSlopeBounds
+open Formalism.LFunctionChainParameters.characterSumData
+open Formalism.LFunctionChainParameters.ThickSetMeanBounds
+open Formalism.LFunctionChainParameters.LErr
+open Formalism.LFunctionChainParameters.LChain
 
 variable {H : Type} [AddCommGroup H] [Fintype H] [DecidableEq H]
   {W : H → Type} [∀ u0, Fintype (W u0)]
