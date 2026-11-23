@@ -5,6 +5,7 @@ on:
     paths:
       - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/SlopeInequalityOfLatticesIntegrated.lean'
       - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/SlopeInequalityOfFamilyIntegrated.lean'
+      - 'src/Formalism/SizeWindowBrackets/ChainSlopeWindows/IntegratedMeanBoundOfSourceInputs.lean'
       - '.github/workflows/rh-integrated-lattice-bridge.yml'
   workflow_dispatch:
 
@@ -46,4 +47,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.SlopeInequalityOfFamilyIntegrated
+          lake build Formalism.SizeWindowBrackets.ChainSlopeWindows.IntegratedMeanBoundOfSourceInputs
