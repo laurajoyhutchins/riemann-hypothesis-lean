@@ -254,3 +254,6 @@ theorem weighted_mean_bound_integrated : MeanBoundWithIntegrated D C Xpp := by
 end
 
 end Formalism.LFunctionChainParameters.WeightedSlopeBounds
+
+#print axioms Formalism.LFunctionChainParameters.WeightedSlopeBounds.Ga_bound5_integrated
+#print axioms Formalism.LFunctionChainParameters.WeightedSlopeBounds.weighted_mean_bound_integrated
